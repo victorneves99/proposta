@@ -1,9 +1,12 @@
 package resource;
 
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dto.ProposalDatailsDTO;
+import io.quarkus.security.Authenticated;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -15,15 +18,20 @@ import jakarta.ws.rs.core.Response.Status;
 import service.ProposalService;
 
 @Path("/api/proposal")
+@Authenticated
 public class ProposalResource {
 
   @Inject
   ProposalService proposalService;
 
+  @Inject
+  JsonWebToken jsonWebToken;
+
   private final Logger LOG = LoggerFactory.getLogger(ProposalResource.class);
 
   @GET
   @Path("/{id}")
+  @RolesAllowed({ "user", "manager" })
   public ProposalDatailsDTO findDetailsProposal(@PathParam("id") long id) {
 
     LOG.info("--- findDetailsProposal ---");
@@ -32,6 +40,7 @@ public class ProposalResource {
   }
 
   @POST
+  @RolesAllowed("proposal-customer")
   public Response createProposal(ProposalDatailsDTO proposalDatailsDTO) {
 
     try {
@@ -49,6 +58,7 @@ public class ProposalResource {
 
   @DELETE
   @Path("/{id}")
+  @RolesAllowed("manager")
   public Response removeProposal(@PathParam("id") long id) {
 
     try {
